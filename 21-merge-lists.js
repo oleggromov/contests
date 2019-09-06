@@ -7,9 +7,7 @@ var mergeTwoLists = function(l1, l2) {
       current.next = l1
       current = current.next
       l1 = l1.next
-    }
-
-    if (l1 && l2.val <= l1.val) {
+    } else if (l2.val <= l1.val) {
       current.next = l2
       current = current.next
       l2 = l2.next
