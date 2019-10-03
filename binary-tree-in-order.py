@@ -12,6 +12,26 @@ def in_order(root, visit):
   visit(root)
   in_order(root.right, visit)
 
+def in_order_iterative(root, visit):
+  if not root:
+    return
+
+  visited = set()
+  stack = [root]
+  while len(stack):
+    next = stack[-1]
+
+    if next.left and not next.left in visited:
+      stack.append(next.left)
+      continue
+
+    visit(next)
+    visited.add(next)
+    stack.pop()
+
+    if next.right and not next.right in visited:
+      stack.append(next.right)
+
 example_tree = TreeNode('F')
 example_tree.left = TreeNode('B')
 example_tree.left.left = TreeNode('A')
@@ -22,7 +42,22 @@ example_tree.right = TreeNode('G')
 example_tree.right.right = TreeNode('I')
 example_tree.right.right.left = TreeNode('H')
 
-values = []
-in_order(example_tree, lambda node: values.append(node.val))
+simple_tree = TreeNode('D')
+simple_tree.left = TreeNode('B')
+simple_tree.left.left = TreeNode('A')
+simple_tree.left.right = TreeNode('C')
+simple_tree.right = TreeNode('E')
 
-print(values)
+def print_node(node):
+  print(node.val, end = ' ')
+
+print('Recursive:')
+in_order(example_tree, print_node)
+print('\nIterative:')
+in_order_iterative(example_tree, print_node)
+
+
+print('\nRecursive:')
+in_order(simple_tree, print_node)
+print('\nIterative:')
+in_order_iterative(simple_tree, print_node)
