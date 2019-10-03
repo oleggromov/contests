@@ -1,9 +1,20 @@
+
+from collections import deque
+
 class TreeNode:
   def __init__(self, val):
     self.val = val
     self.left = None
     self.right = None
 
+'''
+DFS is done easily with recursion.
+BFS is fine in iterative manner / with a queue.
+
+Inspired by: https://www.youtube.com/watch?v=IozGo2kwRYE
+'''
+
+# DFS
 def in_order(root, visit):
   if not root:
     return
@@ -12,6 +23,7 @@ def in_order(root, visit):
   visit(root)
   in_order(root.right, visit)
 
+# DFS iterative / stack
 def in_order_iterative(root, visit):
   if not root:
     return
@@ -61,3 +73,48 @@ print('\nRecursive:')
 in_order(simple_tree, print_node)
 print('\nIterative:')
 in_order_iterative(simple_tree, print_node)
+
+bfs_tree = TreeNode(1)
+bfs_tree.left = TreeNode(2)
+bfs_tree.right = TreeNode(3)
+bfs_tree.left.left = TreeNode(4)
+bfs_tree.left.right = TreeNode(5)
+bfs_tree.right.right = TreeNode(6)
+bfs_tree.left.right.left = TreeNode(7)
+bfs_tree.right.right.left = TreeNode(8)
+
+# BFS / iterative - level-order
+def level_order(root, visit):
+  if not root:
+    return
+
+  queue = deque([root])
+  while len(queue):
+    next = queue.popleft()
+    visit(next)
+
+    if next.left:
+      queue.append(next.left)
+    if next.right:
+      queue.append(next.right)
+
+'''
+This is incorrect!
+Isn't BFS traversal
+'''
+# def level_order_recursive(root, visit):
+#   if not root:
+#     return
+
+#   visit(root)
+
+#   if root.left:
+#     level_order_recursive(root.left, visit)
+#   if root.right:
+#     level_order_recursive(root.right, visit)
+
+print('\nLevel-order BFS iterative / queue:')
+level_order(bfs_tree, print_node)
+
+# print('\nLevel-order BFS recursive:')
+# level_order_recursive(bfs_tree, print_node)
