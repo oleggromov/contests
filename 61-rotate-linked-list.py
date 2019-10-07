@@ -7,13 +7,14 @@
 class Solution:
   def rotateRight(self, head: ListNode, k: int) -> ListNode:
     '''
-    Time complexity: O(2n)
+    Time complexity: O(n)
     Space complexity: O(1) ??
     '''
     length = self.get_length(head) # O(n)
     if not head or not length:
       return
 
+    # In case k is larger than list length
     k = k % length
     if k == 0:
       return head
