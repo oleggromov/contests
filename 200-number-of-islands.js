@@ -3,47 +3,42 @@
  * @return {number}
  */
 var numIslands = function(grid) {
-  const knownSoil = new Set()
-  const water = []
+  // Memory: O(n)
+  const visited = new Set()
   let islands = 0
 
   if (!grid.length) {
     return 0
   }
 
+  // Runtime: O(n)
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[0].length; x++) {
-      if (!isSoil(y, x)) {
-        water.push([y, x])
-      }
-    }
-  }
-
-  if (!water.length) {
-    return 1
-  } else if (water.length === grid.length * grid[0].length) {
-    return 0
-  }
-
-  while (water.length) {
-    const [y, x] = water.pop()
-    for (const [nextY, nextX] of nextMoves(y, x)) {
-      if (isSoil(nextY, nextX)) {
-        islands += exploreSoil(nextY, nextX)
+      // Here we don't visit already visited points
+      // so shall be no runtime multiplication.
+      for (const [nextY, nextX] of nextMoves(y, x)) {
+        // Here we have to check it again so that we don't visit
+        // the points marked as visited in exploreSoil.
+        if (!visited.has(point(nextY, nextX))) {
+          if (isSoil(nextY, nextX)) {
+            exploreSoil(nextY, nextX)
+            islands += 1
+          } else {
+            visited.add(point(nextY, nextX))
+          }
+        }
       }
     }
   }
 
   function exploreSoil(y, x) {
-    if (knownSoil.has(point(y, x))) {
-      return 0
-    }
-
     const soil = [[y, x]]
 
+    // Runtime: O(island size)
+    // Shall not be duplicated because we mark all visited points.
     while (soil.length) {
       const [y, x] = soil.pop()
-      knownSoil.add(point(y, x))
+      visited.add(point(y, x))
 
       for (const [nextY, nextX] of nextMoves(y, x)) {
         if (isSoil(nextY, nextX)) {
@@ -51,10 +46,10 @@ var numIslands = function(grid) {
         }
       }
     }
-
-    return 1
   }
 
+  // A trick to have unique Set values for each point
+  // since JS uses strict comparison for Set.has calls.
   function point(y, x) {
     return Symbol.for(`${y},${x}`)
   }
@@ -67,13 +62,17 @@ var numIslands = function(grid) {
   function nextMoves(currentY, currentX) {
     const moves = [
       [-1, 0], [1, 0],
-      [0, -1], [0, 1]
+      [0, -1], [0, 1],
+      [0, 0]
     ]
 
     return moves
+      // O(1)
       .map(([y, x]) => [y + currentY, x + currentX])
+      // O(1)
       .filter(isInGrid)
-      .filter(([y, x])=> !knownSoil.has(point(y, x)))
+      // O(1)
+      .filter(([y, x])=> !visited.has(point(y, x)))
   }
 
   function isInGrid([y, x]) {
@@ -132,10 +131,13 @@ const failed = [
   ["1","1","1"]
 ]
 
-console.log(numIslands(gridOne))
-console.log(numIslands(gridTwo))
-console.log(numIslands(gridThree))
-console.log(numIslands(gridFour))
-console.log(numIslands(gridFive))
-console.log(numIslands(gridSix))
-console.log(numIslands(failed))
+const failedTwo = [[1]]
+
+console.log(numIslands(gridOne), 'must be 3')
+console.log(numIslands(gridTwo), 'must be 1')
+console.log(numIslands(gridThree), 'must be 6')
+console.log(numIslands(gridFour), 'must be 2')
+console.log(numIslands(gridFive), 'must be 1')
+console.log(numIslands(gridSix), 'must be 0')
+console.log(numIslands(failed), 'must be 1')
+console.log(numIslands(failedTwo), 'must be 1')
