@@ -16,13 +16,12 @@ var sortColors = function(nums) {
   }
 
   for (let l = 0, r = nums.length - 1; l < nums.length; l++, r--) {
-    if (r - l >= 0) {
+    if (r - l > 0) {
       indices[nums[l]]++
-      if (r - l !== 0) {
-        indices[nums[r]]++
-      } else {
-        fill(l)
-      }
+      indices[nums[r]]++
+    } else if (r - l === 0) {
+      indices[nums[l]]++
+      fill(l)
     } else {
       fill(l)
       fill(r)
