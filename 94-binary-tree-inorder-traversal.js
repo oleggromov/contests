@@ -15,6 +15,27 @@ var inorderTraversal = function(root) {
   return result
 }
 
+var inorderTraversalItertive = function(root) {
+  const result = []
+  let current = root
+  const stack = []
+
+  while (1) {
+    if (current) {
+      stack.push(current)
+      current = current.left
+    } else if (stack.length) {
+      current = stack.pop()
+      result.push(current.val)
+      current = current.right
+    } else {
+      break
+    }
+  }
+
+  return result
+}
+
 function traverse(root, cb) {
   if (!root) {
     return
