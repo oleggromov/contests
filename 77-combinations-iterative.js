@@ -46,4 +46,4 @@ var combine = function(n, k) {
 }
 
 // TIME LIMIT EXCEEDED on LeetCode
-console.log(combine(9, 8))
+console.log(combine(4, 3))
