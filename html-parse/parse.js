@@ -94,6 +94,7 @@ function parse(tokens) {
 }
 
 const tokens = tokenize(html)
+// console.log(tokens)
 const tree = parse(tokens)
 printTree(tree)
 

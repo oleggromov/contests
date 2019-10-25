@@ -6,10 +6,32 @@ function isAlpha(char) {
   return 'abcdefghijklmnopqrstuvwxyz'.indexOf(char.toLowerCase()) !== -1
 }
 
-function token(type, attrs) {
-  return {
-    type,
-    ...attrs
+function cloneNonEmpty(obj) {
+  const result = {}
+
+  for (let key in obj) {
+    if (
+      typeof obj[key] !== 'object'
+      || Array.isArray(obj[key]) && obj[key].length
+      || Object.keys(obj[key]).length
+    ) {
+      result[key] = obj[key]
+    }
+  }
+
+  return result
+}
+
+class Token {
+  constructor(type) {
+    this.type = type
+  }
+
+  commit(tokens, tokenProps) {
+    tokens.push({
+      type: this.type,
+      ...cloneNonEmpty(tokenProps)
+    })
   }
 }
 
@@ -28,7 +50,7 @@ class Default {
 class TagOpener {
   consume(char) {
     if (isAlpha(char)) {
-      return new OpenTag(char)
+      return new OpenTag([char])
     }
 
     if (char === '/') {
@@ -54,21 +76,19 @@ class PassTag {
   }
 }
 
-class CloseTag {
+class CloseTag extends Token {
   constructor() {
-    this.type = 'CLOSE_TAG'
+    super('CLOSE_TAG')
     this.name = []
   }
 
   consume(char, tokens) {
     if (char === '>') {
-      tokens.push(token(this.type, {
+      this.commit(tokens, {
         name: this.name.join('')
-      }))
+      })
       return new Default()
-    } else if (isWhitespace(char)) {
-      // ???
-    } else {
+    } else if (!isWhitespace(char)) {
       this.name.push(char)
     }
 
@@ -76,47 +96,33 @@ class CloseTag {
   }
 }
 
-class OpenTag {
-  constructor(firstChar) {
-    this.type = 'OPEN_TAG'
-    this.name = [firstChar]
-    this.attributes = {}
+class OpenTag extends Token {
+  constructor(name = []) {
+    super('OPEN_TAG')
+    this.name = name
   }
 
   consume(char, tokens) {
     if (isWhitespace(char)) {
-      return new Attributes(this, tokens)
+      return new Attributes(this.name)
     } else if (char === '>') {
-      return this.commit(tokens)
+      this.commit(tokens, {
+        name: this.name.join('')
+      })
+      return new Default()
     } else {
       this.name.push(char)
     }
 
     return this
   }
-
-  commit(tokens) {
-    const attrs = { name: this.name.join('') }
-    if (Object.keys(this.attributes).length) {
-      attrs.attributes = this.attributes
-    }
-
-    tokens.push(token(this.type, attrs))
-    return new Default()
-  }
-
-  setAttributes(attrs, tokens) {
-    this.attributes = attrs
-    return this.commit(tokens)
-  }
 }
 
-class Attributes {
-  constructor(parentTag, tokens) {
-    this.parentTag = parentTag
-    this.tokens = tokens
-    this.attributes = {}
+class Attributes extends OpenTag {
+  constructor(name = []) {
+    super(name)
     this.current = { key: [], value: [] }
+    this.attributes = {}
     this.state = 'AWAITING_KEY'
   }
 
@@ -125,9 +131,13 @@ class Attributes {
     this.current = { key: [], value: [] }
   }
 
-  consume(char) {
+  consume(char, tokens) {
     if (char === '>') {
-      return this.parentTag.setAttributes(this.attributes, this.tokens)
+      this.commit(tokens, {
+        name: this.name.join(''),
+        attributes: this.attributes
+      })
+      return new Default()
     }
 
     switch (this.state) {
@@ -163,17 +173,17 @@ class Attributes {
   }
 }
 
-class Text {
+class Text extends Token {
   constructor(firstChar) {
-    this.type = 'TEXT'
+    super('TEXT')
     this.text = [firstChar]
   }
 
   consume(char, tokens) {
     if (char === '<') {
-      tokens.push(token(this.type, {
+      this.commit(tokens, {
         text: this.text.join('')
-      }))
+      })
       return new TagOpener()
     } else {
       this.text.push(char)
