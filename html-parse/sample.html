@@ -5,10 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/ >
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Document</title>
+  <style>
+    .something {
+      background: 'red';
+    }<a>A tag<div>something</div></a>
+  </style>
 </head>
 <body>
   <h1>Sample HTML document<a href="#" target="_blank">hello, I am a link</a></h1>
   <img src="https://oleggromov.com/image.jpg" alt="An image">
   <div></div>
+  <script>
+    console.log('<a href="hello world">This should not be parsed</a>')
+  </script>
 </body>
 </html>

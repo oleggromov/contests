@@ -6,6 +6,10 @@ function isAlpha(char) {
   return 'abcdefghijklmnopqrstuvwxyz'.indexOf(char.toLowerCase()) !== -1
 }
 
+function isNonParseable(tag) {
+  return ['script', 'style'].indexOf(tag) !== -1
+}
+
 function cloneNonEmpty(obj) {
   const result = {}
 
@@ -77,9 +81,9 @@ class PassTag {
 }
 
 class CloseTag extends Token {
-  constructor() {
+  constructor(name = []) {
     super('CLOSE_TAG')
-    this.name = []
+    this.name = name
   }
 
   consume(char, tokens) {
@@ -106,9 +110,13 @@ class OpenTag extends Token {
     if (isWhitespace(char)) {
       return new Attributes(this.name)
     } else if (char === '>') {
-      this.commit(tokens, {
-        name: this.name.join('')
-      })
+      const name = this.name.join('')
+      this.commit(tokens, { name })
+
+      if (isNonParseable(name)) {
+        return new TextUntil(name)
+      }
+
       return new Default()
     } else {
       this.name.push(char)
@@ -176,7 +184,7 @@ class Attributes extends OpenTag {
 class Text extends Token {
   constructor(firstChar) {
     super('TEXT')
-    this.text = [firstChar]
+    this.text = firstChar ? [firstChar] : []
   }
 
   consume(char, tokens) {
@@ -189,6 +197,60 @@ class Text extends Token {
       this.text.push(char)
     }
 
+    return this
+  }
+}
+
+class TextUntil extends Text {
+  constructor(closeTag) {
+    super()
+    this.closeTag = closeTag
+    this.mode = 'NORMAL'
+    this.temp = []
+  }
+
+  consume(char, tokens) {
+    console.log(this.mode, `${char} "${this.temp.join('')}", "${this.text.join('')}"`)
+
+    switch (this.mode) {
+      case 'NORMAL':
+        if (char === '<') {
+          this.mode = 'AWAITING_CLOSE'
+          this.temp.push(char)
+        } else {
+          this.text.push(char)
+        }
+        break
+      case 'AWAITING_CLOSE':
+        this.temp.push(char)
+        if (char === '/') {
+          this.mode = 'CONSUMING_TAG'
+        } else {
+          this.mode = 'NORMAL'
+          this.text = [...this.text, ...this.temp]
+          this.temp = []
+        }
+        break
+      case 'CONSUMING_TAG':
+        this.temp.push(char)
+        if (char === '>') {
+          const currentTag = this.temp.slice(2).join('')
+
+          // console.log(this.temp)
+
+          if (this.closeTag === currentTag) {
+            this.commit(tokens, {
+              text: this.text.join('')
+            })
+            return new CloseTag(this.temp.slice(2)).consume('>', tokens)
+          }
+
+          this.mode = 'NORMAL'
+          this.text = [...this.text, ...this.temp]
+          this.temp = []
+        }
+        break
+    }
     return this
   }
 }
