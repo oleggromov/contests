@@ -46,9 +46,6 @@ function piDecimal(points = 0) {
   return [pi.toFixed(points), loops]
 }
 
-console.log(0, piDecimal())
-console.log(2, piDecimal(2))
-console.log(5, piDecimal(5))
-console.log(6, piDecimal(6))
-console.log(7, piDecimal(7))
-console.log(8, piDecimal(8))
+for (let precision = 0; precision < 10; precision++) {
+  console.log(precision, piDecimal(precision))
+}
