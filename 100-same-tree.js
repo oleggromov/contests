@@ -27,6 +27,8 @@ var isSameTree = function(p, q) {
   return true
 }
 
+// Time: O(n)
+// Space: O(n)
 function getPath(root) {
   const path = []
 
