@@ -36,6 +36,7 @@ function memoize(fn) {
   const cache = {}
   return function(...args) {
     if (!cache[args.join('/')]) {
+      console.log(args)
       cache[args.join('/')] = fn(...args)
     }
 
@@ -46,3 +47,4 @@ function memoize(fn) {
 // console.log(coinChange([1,2,5], 11))
 console.log(coinChange([1,2,5], 100))
 // console.log(coinChange([2], 3))
+console.log(coinChange([3,7,405,436], 8839))

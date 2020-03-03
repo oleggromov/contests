@@ -6,6 +6,7 @@ function flatten_recursive(arr) {
   if (!Array.isArray(arr)) {
     return arr
   }
+  // console.log(new Error().stack)
   return [].concat(...arr.map(flatten_recursive))
 }
 
@@ -34,8 +35,8 @@ function flatten_iterative(arr) {
   return result.reverse()
 }
 
-// console.log(flatten_recursive(deep))
+console.log(flatten_recursive(deep))
 // console.log(flatten_recursive([[0], 1,2,3, [4]]))
 
-console.log(flatten_iterative(deep))
-console.log(flatten_iterative([]))
+// console.log(flatten_iterative(deep))
+// console.log(flatten_iterative([]))
